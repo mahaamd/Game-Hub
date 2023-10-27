@@ -21,7 +21,7 @@ const GenreList = ({ selectdGenre, onSelectedGenre }: Props) => {
   //     datas.filter((item) => {item.id == event.target.id})
   // }
 
-  const { datas, isloading, error } = UseGenres();
+  const { data, error } = UseGenres();
   // if (error) {
   //   return null;
   // }
@@ -35,7 +35,7 @@ const GenreList = ({ selectdGenre, onSelectedGenre }: Props) => {
         Genres
       </Heading>
       <List>
-        {datas.map((item) => (
+        {data?.results.map((item) => (
           <ListItem paddingY="5px" key={item.id}>
             <HStack>
               <Image
