@@ -1,14 +1,8 @@
 // import UseData, { FetchResponse } from "./UseData";
 import { GameQuery } from "../App";
-import { useQuery } from "@tanstack/react-query";
-import apiClient, { FetchResponse } from "../services/api-client";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import APIClient, { FetchResponse } from "../services/api-client";
 import { Platform } from "./usePlatforms";
-
-// export interface Platform {
-//   id: number;
-//   name: string;
-//   slug: string;
-// }
 
 export interface Game {
   id: number;
@@ -18,24 +12,23 @@ export interface Game {
   metacritic: number;
   rating_top: number;
 }
-
+const apiClient = new APIClient<Game>("/games");
 const UseGames = (GameQuery: GameQuery) => {
-  const fetchData = () => {
-    return apiClient
-      .get<FetchResponse<Game>>("/games", {
+  return useInfiniteQuery<FetchResponse<Game>, Error>({
+    queryKey: ["games", GameQuery],
+    queryFn: ({ pageParam = 1 }) =>
+      apiClient.getAll({
         params: {
           genres: GameQuery.genre?.id,
           parent_platforms: GameQuery.platform?.id,
           ordering: GameQuery.sortOrder,
           search: GameQuery.searchText,
+          page: pageParam,
         },
-      })
-      .then((res) => res.data);
-  };
-
-  return useQuery<FetchResponse<Game>, Error>({
-    queryKey: ["games", GameQuery],
-    queryFn: fetchData,
+      }),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.next ? allPages.length + 1 : undefined;
+    },
   });
 };
 
